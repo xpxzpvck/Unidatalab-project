@@ -1,0 +1,232 @@
+combos:
+  - name: "Big Mac Meal"
+    category: "burgers"
+    price: 7.99
+    slots:
+      fries:
+        - "French Fries"
+        - "Potato Dips"
+      drinks:
+        - "Coca-Cola"
+        - "Fanta"
+        - "Sprite"
+        - "Coffee"
+        - "Tea"
+        - "Apple Juice"
+
+  - name: "Cheeseburger Meal"
+    category: "burgers"
+    price: 5.49
+    slots:
+      fries:
+        - "French Fries"
+        - "Potato Dips"
+      drinks:
+        - "Coca-Cola"
+        - "Fanta"
+        - "Sprite"
+        - "Coffee"
+        - "Tea"
+        - "Apple Juice"
+
+  - name: "Double Cheeseburger Meal"
+    category: "burgers"
+    price: 8.49
+    slots:
+      fries:
+        - "French Fries"
+        - "Potato Dips"
+      drinks:
+        - "Coca-Cola"
+        - "Fanta"
+        - "Sprite"
+        - "Coffee"
+        - "Tea"
+        - "Apple Juice"
+
+  - name: "Filet-O-Fish Meal"
+    category: "burgers"
+    price: 7.19
+    slots:
+      fries:
+        - "French Fries"
+        - "Potato Dips"
+      drinks:
+        - "Coca-Cola"
+        - "Fanta"
+        - "Sprite"
+        - "Coffee"
+        - "Tea"
+        - "Apple Juice"
+
+  - name: "McChicken Meal"
+    category: "burgers"
+    price: 6.79
+    slots:
+      fries:
+        - "French Fries"
+        - "Potato Dips"
+      drinks:
+        - "Coca-Cola"
+        - "Fanta"
+        - "Sprite"
+        - "Coffee"
+        - "Tea"
+        - "Apple Juice"
+
+items:
+  # Burgers
+  - name: "Big Mac"
+    category: "burgers"
+    price: 5.99
+
+  - name: "Cheeseburger"
+    category: "burgers"
+    price: 2.49
+
+  - name: "Hamburger"
+    category: "burgers"
+    price: 2.09
+
+  - name: "Filet-O-Fish"
+    category: "burgers"
+    price: 4.19
+
+  - name: "McChicken"
+    category: "burgers"
+    price: 3.79
+
+  - name: "Double Cheeseburger"
+    category: "burgers"
+    price: 3.79
+
+  - name: "Royal Cheeseburger"
+    category: "burgers"
+    price: 6.49
+
+  - name: "Big Tasty"
+    category: "burgers"
+    price: 6.99
+
+  # Fries
+  - name: "French Fries"
+    category: "fries"
+    price: 1.99
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+
+  - name: "Potato Dips"
+    category: "fries"
+    price: 2.19
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+
+  # Drinks
+  - name: "Coca-Cola"
+    category: "drinks"
+    price: 1.29
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+
+  - name: "Fanta"
+    category: "drinks"
+    price: 1.29
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+
+  - name: "Sprite"
+    category: "drinks"
+    price: 1.29
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+
+  - name: "Coffee"
+    category: "drinks"
+    price: 1.09
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+
+  - name: "Tea"
+    category: "drinks"
+    price: 1.09
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+
+  - name: "Apple Juice"
+    category: "drinks"
+    price: 1.49
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+
+  - name: "Milk"
+    category: "drinks"
+    price: 1.29
+
+  # Desserts
+  - name: "McFlurry with M&M's"
+    category: "desserts"
+    price: 2.09
+
+  - name: "McFlurry with Oreo"
+    category: "desserts"
+    price: 2.09
+
+  - name: "Vanilla Cone"
+    category: "desserts"
+    price: 0.79
+
+  - name: "Chocolate Chip Cookie"
+    category: "desserts"
+    price: 1.09
+
+  - name: "Apple Pie"
+    category: "desserts"
+    price: 1.29
+
+deals:
+  - name: "Small Double Deal"
+    category: "deals"
+    possible_items:
+      - "Hamburger"
+      - "Cheeseburger"
+      - "McChicken"
+      - "Filet-O-Fish"
+
+  - name: "Big Double Deal"
+    category: "deals"
+    possible_items:
+      - "Double Cheeseburger"
+      - "Big Mac"
+      - "Royal Cheeseburger"
+      - "Big Tasty"

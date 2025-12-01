@@ -8,6 +8,9 @@ packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = "^3.13"
+pyyaml = "^6.0.3"
+pydantic = "^2.12.5"
+python-dotenv = "^1.2.1"
 
 [build-system]
 requires = ["poetry-core>=1.6"]

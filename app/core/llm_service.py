@@ -72,7 +72,8 @@ class LLMService:
             "if they were not clarified.\n"
             "- For double deals, include kind='double_deal' and put the two burgers inside components with slot names "
             "like 'item1' and 'item2'.\n"
-            "- If the user signals the order is finished, set end_order=true.\n"
+            "- If the user signals the order is finished (e.g., 'that is all', 'done', 'no thanks' to 'anything else?'), set end_order=true.\n"
+            "- If the user rejects an upsell or specific offer (e.g., 'no' to 'want a combo?'), set end_order=false.\n"
             "- Default quantity is 1. Do not return any text outside of the JSON object."
         )
         return (
@@ -140,6 +141,7 @@ class LLMService:
             "You are a friendly McDonald's ordering assistant. Craft a concise, helpful reply "
             "for the user message below. Do NOT claim to add/remove items or change the order; "
             "only ask clarifying questions or acknowledge. Stay on the menu and avoid unavailable items.\n"
+            "If the user declines an offer or seems finished with a thought, ask if they want anything else.\n"
             f"Menu snapshot: {json.dumps(menu.as_prompt_payload())}\n"
             f"Current order: {order_summary or 'empty'}\n"
             f"User: {user_message}\n"

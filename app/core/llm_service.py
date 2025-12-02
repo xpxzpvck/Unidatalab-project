@@ -83,6 +83,9 @@ class LLMService:
         )
 
     def _extract_json(self, text: str) -> str:
+        # Strip code block markdown if present
+        text = re.sub(r"^```json", "", text, flags=re.MULTILINE)
+        text = re.sub(r"^```", "", text, flags=re.MULTILINE)
         match = re.search(r"\{.*\}", text, flags=re.DOTALL)
         if match:
             return match.group(0)

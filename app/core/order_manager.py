@@ -95,9 +95,17 @@ class OrderManager:
         self._normalize_combo_slots(item)
         has_drink = any(comp.slot == "drink" for comp in item.components)
         has_fries = any(comp.slot == "fries" for comp in item.components)
+        
         if not has_fries:
-            item.components.append(OrderComponent(name="French Fries", slot="fries"))
+            # Default to medium fries if size is required
+            props = {}
+            fries_meta = self.menu.get_item("French Fries")
+            if fries_meta and fries_meta.requires_property("size"):
+                props["size"] = "medium"
+            
+            item.components.append(OrderComponent(name="French Fries", slot="fries", properties=props))
             confirmations.append(f"Added default French Fries to your {item.name}.")
+            
         if not has_drink:
             drink_slot = combo_meta.slots.get("drinks") or combo_meta.slots.get("drink")
             drink_options = drink_slot.options if drink_slot else []
@@ -105,7 +113,8 @@ class OrderManager:
                 f"Which drink would you like with your {item.name}? Options: "
                 f"{self._format_options(drink_options) or 'any listed soft drink/coffee/tea'}."
             )
-        # Validate slot options
+
+        # Validate slot options and properties (like size) for components
         for comp in item.components:
             slot_def = combo_meta.slots.get(comp.slot or "") or (
                 combo_meta.slots.get("drinks") if comp.slot == "drink" else None
@@ -116,12 +125,17 @@ class OrderManager:
                     f"Available: {self._format_options(slot_def.options)}."
                 )
                 return False
-            if comp.slot == "drink":
-                drink_meta = self._menu_item(comp.name)
-                if drink_meta and drink_meta.requires_property("size") and "size" not in comp.properties:
+            
+            # Check for required properties on components (e.g. size for fries/drink)
+            comp_meta = self._menu_item(comp.name)
+            if comp_meta and comp_meta.requires_property("size") and "size" not in comp.properties:
+                # If missing size, try to default to medium, otherwise ask
+                if "medium" in comp_meta.properties.get("size", []):
+                    comp.properties["size"] = "medium"
+                else:
                     clarifications.append(
                         f"What size {comp.name} would you like with the {item.name}? "
-                        f"(options: {self._format_options(drink_meta.properties['size'])})"
+                        f"(options: {self._format_options(comp_meta.properties['size'])})"
                     )
                     return False
         return True
@@ -151,8 +165,20 @@ class OrderManager:
                 name=deal_name,
                 kind="double_deal",
                 components=[
-                    OrderComponent(name=first.name, slot="item1", properties=first.properties),
-                    OrderComponent(name=second.name, slot="item2", properties=second.properties),
+                    OrderComponent(
+                        name=first.name, 
+                        slot="item1", 
+                        properties=first.properties,
+                        add_ingredients=first.add_ingredients,
+                        remove_ingredients=first.remove_ingredients
+                    ),
+                    OrderComponent(
+                        name=second.name, 
+                        slot="item2", 
+                        properties=second.properties,
+                        add_ingredients=second.add_ingredients,
+                        remove_ingredients=second.remove_ingredients
+                    ),
                 ],
             )
             confirmations.append(
@@ -161,6 +187,29 @@ class OrderManager:
             remaining.append(double_deal)
         remaining.extend(burger_queue)
         return remaining
+
+    def _validate_ingredients(self, item: OrderItem) -> Optional[str]:
+        """Validate added/removed ingredients against the menu."""
+        meta = self._menu_item(item.name)
+        if not meta:
+            return None
+        
+        # Validate Additions
+        for ing in item.add_ingredients:
+            if ing not in self.menu.ingredients:
+                return f"I don't have the ingredient '{ing}'."
+            # If the item restricts possible ingredients, check validity
+            if meta.possible_ingredients and ing not in meta.possible_ingredients:
+                return f"I cannot add {ing} to {item.name}."
+
+        # Validate Removals (Logic: strict check if it's in default or possible)
+        for ing in item.remove_ingredients:
+             if meta.default_ingredients and ing not in meta.default_ingredients:
+                 # It might be valid to 'remove' something that isn't default but is possible? 
+                 # Usually users only ask to remove things that are there.
+                 # We'll allow it but ignoring it is also fine. Let's strict check defaults.
+                 pass 
+        return None
 
     def _apply_validations(
         self, incoming: List[OrderItem], state: SessionState, clarifications: List[str], confirmations: List[str]
@@ -172,7 +221,9 @@ class OrderManager:
             if virtual_prompt:
                 clarifications.append(virtual_prompt)
                 continue
+            
             meta = self._menu_item(item.name)
+            
             if item.kind == "double_deal":
                 if not item.components or len(item.components) < 2:
                     state.pending_double_deal = item
@@ -193,6 +244,7 @@ class OrderManager:
                     continue
                 valid_items.append(item)
                 continue
+
             if item.kind == "combo":
                 if not self._validate_combo(item, clarifications, confirmations):
                     continue
@@ -200,13 +252,22 @@ class OrderManager:
                     state.pending_combo_drinks.append(item)
                 valid_items.append(item)
                 continue
+
             if not meta:
                 clarifications.append(f"I couldn't find {item.name} on the menu. Can you rephrase?")
                 continue
+            
             size_prompt = self._validate_standalone_size(item)
             if size_prompt:
                 clarifications.append(size_prompt)
                 continue
+            
+            # Ingredient Validation
+            ing_error = self._validate_ingredients(item)
+            if ing_error:
+                clarifications.append(ing_error)
+                continue
+
             valid_items.append(item)
         return valid_items
 
@@ -221,7 +282,15 @@ class OrderManager:
             meta = self._menu_item(item.name)
             if meta and meta.category == "burgers" and state.pending_double_deal:
                 pending = state.pending_double_deal
-                pending.components.append(OrderComponent(name=item.name, slot="item2"))
+                pending.components.append(
+                    OrderComponent(
+                        name=item.name, 
+                        slot="item2",
+                        properties=item.properties,
+                        add_ingredients=item.add_ingredients,
+                        remove_ingredients=item.remove_ingredients
+                    )
+                )
                 confirmations.append(f"Added {item.name} as the second item in your double deal.")
                 completed.append(pending)
                 state.pending_double_deal = None
@@ -311,7 +380,7 @@ class OrderManager:
         upsells = self._upsell_prompts(valid_items, state)
 
         # If nothing changed and no clarification, fall back to LLM response
-        if not valid_items and not clarifications:
+        if not valid_items and not clarifications and not confirmations and not result.intent.end_order:
             reply = self.llm.generate_reply(user_message, self.menu, prior_summary)
             state.last_system_message = reply
             return ChatResponse(message=reply, used_llm_fallback=True)

@@ -146,20 +146,35 @@ class OrderManager:
                 return deal.name
         return None
 
-    def _maybe_upgrade_to_double_deal(
-        self, incoming: List[OrderItem], confirmations: List[str]
-    ) -> List[OrderItem]:
-        burger_queue = [
-            item
-            for item in incoming
-            if self._menu_item(item.name) and self._menu_item(item.name).category == "burgers" and item.kind == "item"
-        ]
-        if len(burger_queue) < 2:
-            return incoming
-        remaining: List[OrderItem] = [item for item in incoming if item not in burger_queue]
-        while len(burger_queue) >= 2:
-            first = burger_queue.pop(0)
-            second = burger_queue.pop(0)
+    def _optimize_order_deals(
+        self, state: SessionState, confirmations: List[str]
+    ) -> None:
+        """
+        Scans the ENTIRE order state for standalone burgers and merges them 
+        into double deals if applicable.
+        """
+        # 1. Identify all standalone burgers in the current order
+        # We store tuples of (OrderComponent representation, OrderItem) to reconstruct logic
+        burgers: List[OrderItem] = []
+        non_burgers: List[OrderItem] = []
+
+        for item in state.order.items:
+            meta = self._menu_item(item.name)
+            if item.kind == "item" and meta and meta.category == "burgers":
+                burgers.append(item)
+            else:
+                non_burgers.append(item)
+
+        if len(burgers) < 2:
+            return  # No optimization possible
+
+        new_deals: List[OrderItem] = []
+        
+        # 2. Pair them up
+        while len(burgers) >= 2:
+            first = burgers.pop(0)
+            second = burgers.pop(0)
+            
             deal_name = self._pick_double_deal(first.name, second.name) or "Double Deal"
             double_deal = OrderItem(
                 name=deal_name,
@@ -182,11 +197,12 @@ class OrderManager:
                 ],
             )
             confirmations.append(
-                f"I've turned {first.name} and {second.name} into a double deal for a 20% discount."
+                f"I've bundled your {first.name} and {second.name} into a {deal_name} for a discount."
             )
-            remaining.append(double_deal)
-        remaining.extend(burger_queue)
-        return remaining
+            new_deals.append(double_deal)
+
+        # 3. Reconstruct the order: Non-burgers + New Deals + Remaining Burgers
+        state.order.items = non_burgers + new_deals + burgers
 
     def _validate_ingredients(self, item: OrderItem) -> Optional[str]:
         """Validate added/removed ingredients against the menu."""
@@ -205,9 +221,6 @@ class OrderManager:
         # Validate Removals (Logic: strict check if it's in default or possible)
         for ing in item.remove_ingredients:
              if meta.default_ingredients and ing not in meta.default_ingredients:
-                 # It might be valid to 'remove' something that isn't default but is possible? 
-                 # Usually users only ask to remove things that are there.
-                 # We'll allow it but ignoring it is also fine. Let's strict check defaults.
                  pass 
         return None
 
@@ -367,12 +380,17 @@ class OrderManager:
         incoming = completed_deals + incoming
 
         valid_items = self._apply_validations(incoming, state, clarifications, confirmations)
-        valid_items = self._maybe_upgrade_to_double_deal(valid_items, confirmations)
+        # Note: We no longer check double deals on *just* the incoming items.
+        # We add them to the order first, then optimize the whole cart.
 
         for item in valid_items:
             if item.kind == "combo":
                 self._replace_burger_with_combo(state, item, confirmations)
             state.order.add_item(item)
+        
+        # Now scan the WHOLE order for potential double deals (e.g. 1 burger from before + 1 new burger)
+        self._optimize_order_deals(state, confirmations)
+
         confirmation_text = self._compose_confirmation(valid_items)
         if confirmation_text:
             confirmations.insert(0, confirmation_text)

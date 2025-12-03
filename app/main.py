@@ -24,7 +24,8 @@ async def _run_client(server_url: str) -> None:
                 continue
             try:
                 resp = await client.post(
-                    f"{server_url}/chat", json={"session_id": session_id, "message": user_input}
+                    f"{server_url}/chat",
+                    json={"session_id": session_id, "message": user_input},
                 )
                 resp.raise_for_status()
                 payload = resp.json()
@@ -33,14 +34,20 @@ async def _run_client(server_url: str) -> None:
                 if payload.get("order_complete"):
                     break
             except httpx.HTTPStatusError as exc:
-                print(f"System: request failed ({exc.response.status_code}): {exc.response.text}")
+                print(
+                    f"System: request failed ({exc.response.status_code}): {exc.response.text}"
+                )
             except Exception as exc:  # pragma: no cover - runtime IO
                 print(f"System: request failed ({exc})")
                 break
 
 
 @cli.command()
-def chat(server: str = typer.Option("http://localhost:8000", "--server", "-s", help="Server base URL")) -> None:
+def chat(
+    server: str = typer.Option(
+        "http://localhost:8000", "--server", "-s", help="Server base URL"
+    )
+) -> None:
     """
     Start the asynchronous CLI chat client.
     """

@@ -98,7 +98,9 @@ def _merge_ingredients(menu: Menu, raw: Dict) -> None:
         name = entry.get("name")
         if not name:
             continue
-        menu.ingredients[name] = Ingredient(name=name, price=float(entry.get("price", 0.0)))
+        menu.ingredients[name] = Ingredient(
+            name=name, price=float(entry.get("price", 0.0))
+        )
 
 
 def load_menu() -> Menu:

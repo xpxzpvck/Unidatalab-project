@@ -39,7 +39,9 @@ class LLMService:
     def __init__(self, model_name: str = "gemini-2.5-flash"):
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
-            raise RuntimeError("GOOGLE_API_KEY is not set. Please export it or provide via .env.")
+            raise RuntimeError(
+                "GOOGLE_API_KEY is not set. Please export it or provide via .env."
+            )
         self.client = genai.Client(api_key=api_key)
         self.model_name = model_name
         self.response_model = model_name
@@ -51,21 +53,21 @@ class LLMService:
             "Read the latest user message and emit strictly JSON (no markdown) "
             "that matches this shape:\n"
             "{\n"
-            '  \"ordered_items\": [\n'
+            '  "ordered_items": [\n'
             "    {\n"
-            '      \"name\": \"Big Mac Meal\",\n'
-            '      \"kind\": \"combo | item | double_deal\",\n'
-            '      \"quantity\": 1,\n'
-            '      \"properties\": {\"size\": \"medium\"},\n'
-            '      \"components\": [\n'
-            '         {\"slot\": \"drink\", \"name\": \"Coca-Cola\", \"properties\": {\"size\": \"medium\"}},\n'
-            '         {\"slot\": \"fries\", \"name\": \"French Fries\", \"properties\": {\"size\": \"medium\"}}\n'
+            '      "name": "Big Mac Meal",\n'
+            '      "kind": "combo | item | double_deal",\n'
+            '      "quantity": 1,\n'
+            '      "properties": {"size": "medium"},\n'
+            '      "components": [\n'
+            '         {"slot": "drink", "name": "Coca-Cola", "properties": {"size": "medium"}},\n'
+            '         {"slot": "fries", "name": "French Fries", "properties": {"size": "medium"}}\n'
             "      ],\n"
-            '      \"add_ingredients\": [\"Bacon\"],\n'
-            '      \"remove_ingredients\": [\"Onion\"]\n'
+            '      "add_ingredients": ["Bacon"],\n'
+            '      "remove_ingredients": ["Onion"]\n'
             "    }\n"
             "  ],\n"
-            '  \"end_order\": false\n'
+            '  "end_order": false\n'
             "}\n"
             "- Use only item names from the provided menu JSON.\n"
             "- Preserve user virtual requests like 'burger', 'drink', 'dessert', 'combo', or 'ice cream' as the name "
@@ -136,7 +138,9 @@ class LLMService:
             logger.error("LLM parse error: %s | raw: %s", exc, raw_text)
             return LLMResult(intent=None, raw=raw_text, error=f"Parse error: {exc}")
 
-    def generate_reply(self, user_message: str, menu: Menu, order_summary: str = "") -> str:
+    def generate_reply(
+        self, user_message: str, menu: Menu, order_summary: str = ""
+    ) -> str:
         prompt = (
             "You are a friendly McDonald's ordering assistant. Craft a concise, helpful reply "
             "for the user message below. Do NOT claim to add/remove items or change the order; "

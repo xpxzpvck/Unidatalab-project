@@ -43,7 +43,9 @@ class OrderItem(BaseModel):
             label = comp.name
             inner_mods = []
             if comp.properties:
-                inner_mods.append(", ".join(f"{k}={v}" for k, v in comp.properties.items()))
+                inner_mods.append(
+                    ", ".join(f"{k}={v}" for k, v in comp.properties.items())
+                )
             if comp.add_ingredients:
                 inner_mods.append(f"add {', '.join(comp.add_ingredients)}")
             if comp.remove_ingredients:
@@ -95,8 +97,14 @@ class Order(BaseModel):
 
     def item_total(self, item: OrderItem, menu: Menu) -> float:
         if item.kind == "double_deal":
-            subtotal = sum(self._component_price(comp, menu) for comp in item.components)
-            deal = menu.get_double_deal(item.name) if hasattr(menu, "get_double_deal") else None
+            subtotal = sum(
+                self._component_price(comp, menu) for comp in item.components
+            )
+            deal = (
+                menu.get_double_deal(item.name)
+                if hasattr(menu, "get_double_deal")
+                else None
+            )
             discount = deal.discount if deal else 0.2
             total = subtotal * (1 - discount)
             return total * max(item.quantity, 1)

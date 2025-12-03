@@ -92,12 +92,18 @@ class Menu(BaseModel):
                     "name": combo.name,
                     "category": combo.category,
                     "price": combo.price,
-                    "slots": {slot: slot_def.options for slot, slot_def in combo.slots.items()},
+                    "slots": {
+                        slot: slot_def.options for slot, slot_def in combo.slots.items()
+                    },
                 }
                 for combo in self.combos.values()
             ],
             "double_deals": [
-                {"name": deal.name, "possible_items": deal.possible_items, "discount": deal.discount}
+                {
+                    "name": deal.name,
+                    "possible_items": deal.possible_items,
+                    "discount": deal.discount,
+                }
                 for deal in self.deals.values()
             ],
             "ingredients": [

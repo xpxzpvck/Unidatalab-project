@@ -101,7 +101,7 @@ class OrderManager:
         has_drink = any(comp.slot == "drink" for comp in item.components)
         has_fries = any(comp.slot == "fries" for comp in item.components)
         
-        # Check if we are updating an existing combo that already has a drink
+        
         existing_match = None
         for existing in reversed(state.order.items):
             if existing.name == item.name and existing.kind == "combo":
@@ -109,12 +109,12 @@ class OrderManager:
                 break
 
         if not has_drink and existing_match:
-            # If the existing order has a drink, we assume this is an update and allow it
+            
             if any(c.slot == "drink" for c in existing_match.components):
                 has_drink = True
         
         if not has_fries:
-            # Default to medium fries if size is required
+            
             props = {}
             fries_meta = self.menu.get_item("French Fries")
             if fries_meta and fries_meta.requires_property("size"):
@@ -132,7 +132,7 @@ class OrderManager:
             )
             return False
 
-        # Validate slot options and properties (like size) for components
+        
         for comp in item.components:
             slot_def = combo_meta.slots.get(comp.slot or "") or (
                 combo_meta.slots.get("drinks") if comp.slot == "drink" else None
@@ -144,10 +144,10 @@ class OrderManager:
                 )
                 return False
             
-            # Check for required properties on components (e.g. size for fries/drink)
+            
             comp_meta = self._menu_item(comp.name)
             if comp_meta and comp_meta.requires_property("size") and "size" not in comp.properties:
-                # If missing size, try to default to medium, otherwise ask
+                
                 if "medium" in comp_meta.properties.get("size", []):
                     comp.properties["size"] = "medium"
                 else:
@@ -171,8 +171,8 @@ class OrderManager:
         Scans the ENTIRE order state for standalone burgers and merges them 
         into double deals if applicable.
         """
-        # 1. Identify all standalone burgers in the current order
-        # We store tuples of (OrderComponent representation, OrderItem) to reconstruct logic
+        
+        
         burgers: List[OrderItem] = []
         non_burgers: List[OrderItem] = []
 
@@ -184,11 +184,11 @@ class OrderManager:
                 non_burgers.append(item)
 
         if len(burgers) < 2:
-            return  # No optimization possible
+            return  
 
         new_deals: List[OrderItem] = []
         
-        # 2. Pair them up
+        
         while len(burgers) >= 2:
             first = burgers.pop(0)
             second = burgers.pop(0)
@@ -219,7 +219,7 @@ class OrderManager:
             )
             new_deals.append(double_deal)
 
-        # 3. Reconstruct the order: Non-burgers + New Deals + Remaining Burgers
+        
         state.order.items = non_burgers + new_deals + burgers
 
     def _validate_ingredients(self, item: OrderItem) -> Optional[str]:
@@ -228,15 +228,15 @@ class OrderManager:
         if not meta:
             return None
         
-        # Validate Additions
+        
         for ing in item.add_ingredients:
             if ing not in self.menu.ingredients:
                 return f"I don't have the ingredient '{ing}'."
-            # If the item restricts possible ingredients, check validity
+            
             if meta.possible_ingredients and ing not in meta.possible_ingredients:
                 return f"I cannot add {ing} to {item.name}."
 
-        # Validate Removals (Logic: strict check if it's in default or possible)
+        
         for ing in item.remove_ingredients:
              if meta.default_ingredients and ing not in meta.default_ingredients:
                  pass 
@@ -247,7 +247,7 @@ class OrderManager:
     ) -> List[OrderItem]:
         valid_items: List[OrderItem] = []
         for item in incoming:
-            # Virtual items need clarification
+            
             virtual_prompt = self._validate_virtual(item.name)
             if virtual_prompt:
                 clarifications.append(virtual_prompt)
@@ -293,7 +293,7 @@ class OrderManager:
                 clarifications.append(size_prompt)
                 continue
             
-            # Ingredient Validation
+            
             ing_error = self._validate_ingredients(item)
             if ing_error:
                 clarifications.append(ing_error)
@@ -338,7 +338,7 @@ class OrderManager:
     def _upsell_prompts(self, items: List[OrderItem], state: SessionState) -> List[str]:
         prompts: List[str] = []
         for item in items:
-            # Handle Combos explicitly since _menu_item() only checks items
+            
             if item.kind == "combo":
                 prompts.append(f"Would you like to add a dipping sauce to your {item.name} for an extra charge?")
                 if not state.order.dessert_offered:
@@ -346,7 +346,7 @@ class OrderManager:
                     state.order.dessert_offered = True
                 continue
 
-            # Handle standalone items
+            
             meta = self._menu_item(item.name)
             if not meta:
                 continue
@@ -376,23 +376,23 @@ class OrderManager:
     
     def _update_or_add_item(self, state: SessionState, incoming: OrderItem, confirmations: List[str]) -> None:
         existing = None
-        # Find the most recent matching item
+        
         for item in reversed(state.order.items):
             if item.name == incoming.name:
                 existing = item
                 break
         
         if existing:
-            # Merge logic: Add new ingredients / update properties
+            
             existing.add_ingredients.extend(incoming.add_ingredients)
             existing.remove_ingredients.extend(incoming.remove_ingredients)
             existing.properties.update(incoming.properties)
 
-            # Update components (e.g. burger ingredients inside a combo)
+            
             for inc_comp in incoming.components:
                 match = None
                 for ex_comp in existing.components:
-                    # Match by name or slot (e.g. "item1" in double deal)
+                    
                     if ex_comp.name == inc_comp.name or (ex_comp.slot and ex_comp.slot == inc_comp.slot):
                         match = ex_comp
                         break
@@ -439,15 +439,15 @@ class OrderManager:
         incoming = completed_deals + incoming
 
         valid_items = self._apply_validations(incoming, state, clarifications, confirmations)
-        # Note: We no longer check double deals on *just* the incoming items.
-        # We add them to the order first, then optimize the whole cart.
+        
+        
 
         for item in valid_items:
             if item.kind == "combo":
                 self._replace_burger_with_combo(state, item, confirmations)
             self._update_or_add_item(state, item, confirmations)
         
-        # Now scan the WHOLE order for potential double deals (e.g. 1 burger from before + 1 new burger)
+        
         self._optimize_order_deals(state, confirmations)
 
         confirmation_text = self._compose_confirmation(valid_items)
@@ -457,7 +457,7 @@ class OrderManager:
         upsell_candidates = valid_items + updated_combos
         upsells = self._upsell_prompts(upsell_candidates, state)
 
-        # If nothing changed and no clarification, fall back to LLM response
+        
         if not valid_items and not updated_combos and not clarifications and not confirmations and not result.intent.end_order:
             reply = self.llm.generate_reply(user_message, self.menu, prior_summary)
             state.last_system_message = reply

@@ -122,7 +122,7 @@ class LLMService:
                 model=self.model_name,
                 contents=[{"role": "user", "parts": [{"text": prompt}]}],
             )
-        except Exception as exc:  # pragma: no cover - network path
+        except Exception as exc:
             logger.error("LLM call failed: %s", exc)
             return LLMResult(intent=None, raw="", error=f"LLM call failed: {exc}")
 

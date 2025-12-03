@@ -68,15 +68,18 @@ class OrderManager:
 
     def _assign_drinks_to_pending_combos(
         self, state: SessionState, incoming: List[OrderItem], confirmations: List[str]
-    ) -> List[OrderItem]:
+    ) -> Tuple[List[OrderItem], List[OrderItem]]:
         remaining: List[OrderItem] = []
         drink_candidates: List[OrderItem] = []
+        updated_combos: List[OrderItem] = []
+
         for item in incoming:
             meta = self._menu_item(item.name)
             if meta and meta.category == "drinks":
                 drink_candidates.append(item)
             else:
                 remaining.append(item)
+
         for combo_item in list(state.pending_combo_drinks):
             if not drink_candidates:
                 break
@@ -84,8 +87,10 @@ class OrderManager:
             combo_item.components.append(OrderComponent(name=drink.name, slot="drink", properties=drink.properties))
             confirmations.append(f"Added {drink.name} to your {combo_item.name}.")
             state.pending_combo_drinks.remove(combo_item)
+            updated_combos.append(combo_item)
+            
         remaining.extend(drink_candidates)
-        return remaining
+        return remaining, updated_combos
 
     def _validate_combo(self, item: OrderItem, clarifications: List[str], confirmations: List[str], state: SessionState) -> bool:
         combo_meta = self._combo(item.name)
@@ -333,16 +338,23 @@ class OrderManager:
     def _upsell_prompts(self, items: List[OrderItem], state: SessionState) -> List[str]:
         prompts: List[str] = []
         for item in items:
+            # Handle Combos explicitly since _menu_item() only checks items
+            if item.kind == "combo":
+                prompts.append(f"Would you like to add a dipping sauce to your {item.name} for an extra charge?")
+                if not state.order.dessert_offered:
+                    prompts.append("Care for a dessert to go with that?")
+                    state.order.dessert_offered = True
+                continue
+
+            # Handle standalone items
             meta = self._menu_item(item.name)
             if not meta:
                 continue
             if item.kind == "item" and meta.category == "burgers":
                 prompts.append(f"Would you like to make the {item.name} a combo?")
-            if item.kind == "combo":
-                prompts.append(f"Want to add a dipping sauce to your {item.name}?")
-            if (meta.category == "burgers" or item.kind == "combo") and not state.order.dessert_offered:
-                prompts.append("Care for a dessert to go with that?")
-                state.order.dessert_offered = True
+                if not state.order.dessert_offered:
+                    prompts.append("Care for a dessert to go with that?")
+                    state.order.dessert_offered = True
         return prompts
 
     def _finalize_or_continue(
@@ -422,7 +434,7 @@ class OrderManager:
         confirmations: List[str] = []
 
         incoming = list(result.intent.ordered_items)
-        incoming = self._assign_drinks_to_pending_combos(state, incoming, confirmations)
+        incoming, updated_combos = self._assign_drinks_to_pending_combos(state, incoming, confirmations)
         completed_deals, incoming = self._apply_pending_double_deal(state, incoming, confirmations)
         incoming = completed_deals + incoming
 
@@ -442,10 +454,11 @@ class OrderManager:
         if confirmation_text:
             confirmations.insert(0, confirmation_text)
 
-        upsells = self._upsell_prompts(valid_items, state)
+        upsell_candidates = valid_items + updated_combos
+        upsells = self._upsell_prompts(upsell_candidates, state)
 
         # If nothing changed and no clarification, fall back to LLM response
-        if not valid_items and not clarifications and not confirmations and not result.intent.end_order:
+        if not valid_items and not updated_combos and not clarifications and not confirmations and not result.intent.end_order:
             reply = self.llm.generate_reply(user_message, self.menu, prior_summary)
             state.last_system_message = reply
             return ChatResponse(message=reply, used_llm_fallback=True)

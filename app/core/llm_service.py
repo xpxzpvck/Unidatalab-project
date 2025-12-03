@@ -129,7 +129,7 @@ class LLMService:
         raw_text = self._response_text(response)
         try:
             json_payload = self._extract_json(raw_text)
-            parsed_dict = json.loads(json_payload)
+            parsed_dict, _ = json.JSONDecoder().raw_decode(json_payload)
             intent = LLMOrderIntent(**parsed_dict)
             return LLMResult(intent=intent, raw=raw_text)
         except (json.JSONDecodeError, ValidationError) as exc:

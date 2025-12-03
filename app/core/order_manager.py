@@ -87,7 +87,7 @@ class OrderManager:
         remaining.extend(drink_candidates)
         return remaining
 
-    def _validate_combo(self, item: OrderItem, clarifications: List[str], confirmations: List[str]) -> bool:
+    def _validate_combo(self, item: OrderItem, clarifications: List[str], confirmations: List[str], state: SessionState) -> bool:
         combo_meta = self._combo(item.name)
         if not combo_meta:
             clarifications.append(f"I couldn't find {item.name} as a combo. Can you rephrase the combo order?")
@@ -95,6 +95,18 @@ class OrderManager:
         self._normalize_combo_slots(item)
         has_drink = any(comp.slot == "drink" for comp in item.components)
         has_fries = any(comp.slot == "fries" for comp in item.components)
+        
+        # Check if we are updating an existing combo that already has a drink
+        existing_match = None
+        for existing in reversed(state.order.items):
+            if existing.name == item.name and existing.kind == "combo":
+                existing_match = existing
+                break
+
+        if not has_drink and existing_match:
+            # If the existing order has a drink, we assume this is an update and allow it
+            if any(c.slot == "drink" for c in existing_match.components):
+                has_drink = True
         
         if not has_fries:
             # Default to medium fries if size is required
@@ -113,6 +125,7 @@ class OrderManager:
                 f"Which drink would you like with your {item.name}? Options: "
                 f"{self._format_options(drink_options) or 'any listed soft drink/coffee/tea'}."
             )
+            return False
 
         # Validate slot options and properties (like size) for components
         for comp in item.components:
@@ -259,7 +272,7 @@ class OrderManager:
                 continue
 
             if item.kind == "combo":
-                if not self._validate_combo(item, clarifications, confirmations):
+                if not self._validate_combo(item, clarifications, confirmations, state):
                     continue
                 if not any(comp.slot == "drink" for comp in item.components):
                     state.pending_combo_drinks.append(item)
@@ -348,6 +361,40 @@ class OrderManager:
         trailing = upsells or ["Anything else I can get you?"]
         message = " ".join(confirmations + trailing)
         return ChatResponse(message=message)
+    
+    def _update_or_add_item(self, state: SessionState, incoming: OrderItem, confirmations: List[str]) -> None:
+        existing = None
+        # Find the most recent matching item
+        for item in reversed(state.order.items):
+            if item.name == incoming.name:
+                existing = item
+                break
+        
+        if existing:
+            # Merge logic: Add new ingredients / update properties
+            existing.add_ingredients.extend(incoming.add_ingredients)
+            existing.remove_ingredients.extend(incoming.remove_ingredients)
+            existing.properties.update(incoming.properties)
+
+            # Update components (e.g. burger ingredients inside a combo)
+            for inc_comp in incoming.components:
+                match = None
+                for ex_comp in existing.components:
+                    # Match by name or slot (e.g. "item1" in double deal)
+                    if ex_comp.name == inc_comp.name or (ex_comp.slot and ex_comp.slot == inc_comp.slot):
+                        match = ex_comp
+                        break
+                
+                if match:
+                    match.properties.update(inc_comp.properties)
+                    match.add_ingredients.extend(inc_comp.add_ingredients)
+                    match.remove_ingredients.extend(inc_comp.remove_ingredients)
+                else:
+                    existing.components.append(inc_comp)
+            
+            confirmations.append(f"Updated your {existing.name}.")
+        else:
+            state.order.add_item(incoming)
 
     def process_message(self, state: SessionState, user_message: str) -> ChatResponse:
         prior_summary = "; ".join(state.order.summary_lines(self.menu))
@@ -386,7 +433,7 @@ class OrderManager:
         for item in valid_items:
             if item.kind == "combo":
                 self._replace_burger_with_combo(state, item, confirmations)
-            state.order.add_item(item)
+            self._update_or_add_item(state, item, confirmations)
         
         # Now scan the WHOLE order for potential double deals (e.g. 1 burger from before + 1 new burger)
         self._optimize_order_deals(state, confirmations)

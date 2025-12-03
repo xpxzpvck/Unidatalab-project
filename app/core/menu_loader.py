@@ -8,7 +8,7 @@ import yaml
 from app.models.menu import Combo, ComboSlot, DoubleDeal, Ingredient, Menu, MenuItem
 
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 MENU_FILES = [
     DATA_DIR / "menu_deals.yaml",
     DATA_DIR / "menu_ingredients.yaml",

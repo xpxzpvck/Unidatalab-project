@@ -18,12 +18,9 @@ class CartService:
             if meta.is_deal:
                 subtotal = 0.0
                 for comp in item.components:
-
                     comp_meta = self.menu_service.get_item(comp.name)
                     if comp_meta and comp_meta.price:
-
                         comp_price = comp_meta.price
-
                         for ing_name in comp.add_ingredients:
                             ing = self.menu_service.get_ingredient(ing_name)
                             if ing:
@@ -34,7 +31,6 @@ class CartService:
                 item_total = subtotal * (1.0 - discount)
 
             else:
-
                 item_total = meta.price or 0.0
 
                 for ing_name in item.add_ingredients:
@@ -43,7 +39,6 @@ class CartService:
                         item_total += ing.price
 
                 for comp in item.components:
-
                     if comp.slot == "sauces":
                         sauce = self.menu_service.get_item(comp.name)
                         if sauce and sauce.price:
@@ -82,7 +77,6 @@ class CartService:
                     found = any(c.slot in ["drink", "drinks"] for c in item.components)
 
                 if not found:
-
                     examples = (
                         slot_def.options[:3] if slot_def.options else ["Cola", "Fanta"]
                     )

@@ -8,16 +8,13 @@ import typer
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-
 from app.schemas import ChatRequest, ChatReply, SessionState
 from app.services.menu_service import MenuService
 from app.services.cart_service import CartService
 from app.services.chat_service import ChatService
 from app.services.llm_service import LLMService
 
-
 app = FastAPI(title="McDonald's Ordering Simulator")
-
 
 menu_service = MenuService()
 
@@ -32,7 +29,10 @@ sessions: Dict[str, SessionState] = {}
 async def create_session():
     sid = uuid.uuid4().hex
     sessions[sid] = SessionState()
-    return {"session_id": sid, "message": "Welcome to McDonald's! What would you like to order?"}
+    return {
+        "session_id": sid,
+        "message": "Welcome to McDonald's! What would you like to order?",
+    }
 
 
 @app.post("/chat", response_model=ChatReply)

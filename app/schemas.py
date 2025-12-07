@@ -51,7 +51,6 @@ class OrderItem(BaseModel):
     remove_ingredients: List[str] = Field(default_factory=list)
 
     def describe(self) -> str:
-
         parts = [self.name]
         for comp in self.components:
             parts.append(f"[{comp.slot or 'incl'}: {comp.name}]")
@@ -63,13 +62,13 @@ class Order(BaseModel):
 
     @property
     def total_price(self) -> float:
-
         return 0.0
 
 
 class SessionState(BaseModel):
     order: Order = Field(default_factory=Order)
 
+    pending_item: Optional[OrderItem] = None
     pending_clarification: Optional[str] = None
     last_system_message: str = ""
 

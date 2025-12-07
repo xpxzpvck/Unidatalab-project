@@ -444,6 +444,18 @@ class OrderManager:
             confirmations.append(f"Updated your {existing.name}.")
         else:
             state.order.add_item(incoming)
+    
+    def _replace_burger_with_combo(
+        self, state: SessionState, combo_item: OrderItem, confirmations: List[str]
+    ) -> None:
+        base = _base_burger_name_from_combo(combo_item.name)
+        if not base:
+            return
+        for idx, existing in enumerate(state.order.items):
+            if existing.kind == "item" and existing.name.lower() == base.lower():
+                state.order.items.pop(idx)
+                confirmations.append(f"Converted your {base} into a combo.")
+                break
 
     def process_message(self, state: SessionState, user_message: str) -> ChatResponse:
         prior_summary = "; ".join(state.order.summary_lines(self.menu))
@@ -519,15 +531,3 @@ class OrderManager:
         )
         state.last_system_message = chat_response.message
         return chat_response
-
-    def _replace_burger_with_combo(
-        self, state: SessionState, combo_item: OrderItem, confirmations: List[str]
-    ) -> None:
-        base = _base_burger_name_from_combo(combo_item.name)
-        if not base:
-            return
-        for idx, existing in enumerate(state.order.items):
-            if existing.kind == "item" and existing.name.lower() == base.lower():
-                state.order.items.pop(idx)
-                confirmations.append(f"Converted your {base} into a combo.")
-                break

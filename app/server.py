@@ -1,12 +1,10 @@
-from __future__ import annotations
-
 import uuid
 from typing import Dict
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from app.core.llm_service import LLMService
+from app.services.llm_service import LLMService
 from app.core.menu_loader import load_menu
 from app.core.order_manager import ChatResponse, OrderManager, SessionState
 

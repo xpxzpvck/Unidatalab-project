@@ -60,10 +60,6 @@ class OrderItem(BaseModel):
 class Order(BaseModel):
     items: List[OrderItem] = Field(default_factory=list)
 
-    @property
-    def total_price(self) -> float:
-        return 0.0
-
 
 class SessionState(BaseModel):
     order: Order = Field(default_factory=Order)

@@ -2,9 +2,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List
 import yaml
 from app.schemas import Menu, MenuItem, Ingredient, ComboSlot
-
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-
+from app.config import settings
 
 class MenuService:
     def __init__(self):
@@ -37,7 +35,7 @@ class MenuService:
         raw_data = {"items": [], "combos": [], "deals": [], "ingredients": []}
 
         for fname in files:
-            fpath = DATA_DIR / fname
+            fpath = settings.DATA_DIR / fname
             if fpath.exists():
                 with open(fpath, "r", encoding="utf-8") as f:
                     data = yaml.safe_load(f) or {}
@@ -51,10 +49,8 @@ class MenuService:
                             self.menu.ingredients[ing["name"]] = Ingredient(**ing)
 
         for item in raw_data["items"]:
-
             if "properties" in item:
                 item["properties"] = self._transform_properties(item["properties"])
-
             self.menu.items[item["name"]] = MenuItem(**item)
 
         for combo in raw_data["combos"]:

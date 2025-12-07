@@ -5,12 +5,10 @@ from typing import Optional
 from dataclasses import dataclass
 from pydantic import BaseModel, Field, ValidationError
 from cerebras.cloud.sdk import Cerebras
-from dotenv import load_dotenv
-
 
 from app.schemas import Menu, OrderItem
+from app.config import settings
 
-load_dotenv()
 logger = logging.getLogger(__name__)
 
 
@@ -36,8 +34,8 @@ class LLMResult:
 
 
 class LLMService:
-    def __init__(self, model_name: str = "gpt-oss-120b"):
-        api_key = os.getenv("CEREBRAS_API_KEY")
+    def __init__(self, model_name: str = settings.LLM_MODEL):
+        api_key = settings.CEREBRAS_API_KEY
         if not api_key:
             logger.warning("CEREBRAS_API_KEY is not set. LLM calls will fail.")
             self.client = None
@@ -93,7 +91,6 @@ class LLMService:
         ]
 
         try:
-
             json_schema = LLMOrderIntent.model_json_schema()
 
             response = self.client.chat.completions.create(
@@ -137,7 +134,7 @@ class LLMService:
 
         try:
             response = self.client.chat.completions.create(
-                model="gpt-oss-120b",
+                model=self.model_name,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message},

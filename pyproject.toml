@@ -16,6 +16,7 @@ fastapi = "^0.115.5"
 uvicorn = "^0.32.0"
 httpx = "^0.28.1"
 typer = ">=0.16.0"
+pydantic-settings = "^2.12.0"
 
 [build-system]
 requires = ["poetry-core>=1.6"]

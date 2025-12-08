@@ -105,9 +105,16 @@ class ChatService:
                 + "; ".join([str(i) for i in state.order.items])
             )
             llm_result = self.llm.parse_intent(user_input, self.menu.menu, context)
-
-            if not llm_result.success or not llm_result.intent:
+            if (
+                not llm_result.success
+                or not llm_result.intent
+                or (
+                    not llm_result.intent.ordered_items
+                    and not llm_result.intent.end_order
+                )
+            ):
                 reply = self.llm.generate_reply(user_input, self.menu.menu, context)
+                reply = f"[LLM] {reply}"
 
                 if state.upsell_queue:
                     next_upsell = state.upsell_queue.pop(0)

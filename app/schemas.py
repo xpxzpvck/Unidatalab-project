@@ -87,8 +87,7 @@ class Order(BaseModel):
 
 class SessionState(BaseModel):
     order: Order = Field(default_factory=Order)
-
-    pending_item: Optional[OrderItem] = None
+    pending_items: List[OrderItem] = Field(default_factory=list)     
     pending_clarification: Optional[str] = None
     last_system_message: str = ""
 

@@ -1,4 +1,4 @@
-from app.schemas import SessionState, OrderItem, OrderComponent
+from app.schemas import SessionState, OrderItem, OrderComponent, ItemType
 from app.services.llm_service import LLMService
 from app.services.cart_service import CartService
 from app.services.menu_service import MenuService
@@ -39,13 +39,10 @@ class ChatService:
                 state.pending_items.pop(0)
                 response_buffer.append(f"Added {item.name}.")
             elif resolved:
-
                 pass
             else:
-
                 exact_match = self.menu.get_item(user_input.title())
                 if not exact_match:
-
                     context = (
                         f"Previous Question: {state.last_system_message}. Current Order: "
                         + "; ".join([str(i) for i in state.order.items])
@@ -90,7 +87,6 @@ class ChatService:
                             return f"{error_msg}"
 
                     elif not exact_match.virtual:
-
                         item.name = exact_match.name
                         item.components = []
                         is_valid, error_msg = self.cart.validate_item(item)
@@ -146,6 +142,7 @@ class ChatService:
                 return msg
 
             state.pending_items.extend(intent.ordered_items)
+            self._check_and_apply_deals(state)
 
         while state.pending_items:
             item = state.pending_items[0]
@@ -178,19 +175,88 @@ class ChatService:
             if base_msg:
                 final_msg = f"{base_msg} {next_upsell}"
             else:
-
                 final_msg = next_upsell
         else:
-
             total = self.cart.calculate_total(state.order)
             if base_msg:
                 final_msg = f"{base_msg} (Total: ${total:.2f}). Anything else?"
             else:
-
                 final_msg = f"Current order total: ${total:.2f}. Anything else?"
 
         state.last_system_message = final_msg
         return final_msg
+
+    def _check_and_apply_deals(self, state: SessionState) -> None:
+        deals = [
+            item
+            for item in self.menu.menu.items.values()
+            if item.is_deal and item.possible_items
+        ]
+        if not deals:
+            return
+
+        pending = state.pending_items
+        new_pending = []
+        used_indices = set()
+
+        for i in range(len(pending)):
+            if i in used_indices:
+                continue
+
+            item_a = pending[i]
+            
+            potential_deals = [d for d in deals if item_a.name in d.possible_items]
+            
+            matched_deal = None
+            match_index = -1
+
+            if potential_deals:
+                for j in range(i + 1, len(pending)):
+                    if j in used_indices:
+                        continue
+                    item_b = pending[j]
+                    
+                    valid_deals = [
+                        d for d in potential_deals 
+                        if item_b.name in d.possible_items
+                    ]
+                    
+                    if valid_deals:
+                        matched_deal = valid_deals[0]
+                        match_index = j
+                        break
+            
+            if matched_deal and match_index != -1:
+                item_b = pending[match_index]
+                
+                comp_a = OrderComponent(
+                    name=item_a.name,
+                    properties=item_a.properties,
+                    add_ingredients=item_a.add_ingredients,
+                    remove_ingredients=item_a.remove_ingredients
+                )
+                comp_b = OrderComponent(
+                    name=item_b.name,
+                    properties=item_b.properties,
+                    add_ingredients=item_b.add_ingredients,
+                    remove_ingredients=item_b.remove_ingredients
+                )
+
+                deal_item = OrderItem(
+                    name=matched_deal.name,
+                    kind=ItemType.DOUBLE_DEAL,
+                    quantity=1,
+                    components=[comp_a, comp_b]
+                )
+                
+                new_pending.append(deal_item)
+                used_indices.add(i)
+                used_indices.add(match_index)
+            else:
+                new_pending.append(item_a)
+                used_indices.add(i)
+        
+        state.pending_items = new_pending
 
     def _get_upsells(
         self, state: SessionState, new_items: list[OrderItem]

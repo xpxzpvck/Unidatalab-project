@@ -1,5 +1,11 @@
 from typing import Dict, List, Optional, Literal
 from pydantic import BaseModel, Field
+from enum import Enum
+
+class ItemType(str, Enum):
+    ITEM = "item"
+    COMBO = "combo"
+    DOUBLE_DEAL = "double_deal"
 
 
 class Ingredient(BaseModel):
@@ -8,23 +14,23 @@ class Ingredient(BaseModel):
 
 
 class ComboSlot(BaseModel):
-    name: str
-    options: List[str]
-    optional: bool = False
+    name: str                   # e.g. fries, drinks, sauces
+    options: List[str]          # possible item names for this slot
+    optional: bool = False      # is this slot optional?
 
 
 class MenuItem(BaseModel):
     name: str
-    category: Optional[str] = None
+    category: Optional[str] = None                                   # e.g. burgers, fries, desserts
     price: Optional[float] = None
-    properties: Dict[str, List[str]] = Field(default_factory=dict)
-    default_ingredients: List[str] = Field(default_factory=list)
-    possible_ingredients: List[str] = Field(default_factory=list)
+    properties: Dict[str, List[str]] = Field(default_factory=dict)  # e.g. size: [small, medium, large]
+    default_ingredients: List[str] = Field(default_factory=list)    # ingredients included by default
+    possible_ingredients: List[str] = Field(default_factory=list)   # ingredients that can be added/removed
     virtual: bool = False
-    possible_items: List[str] = Field(default_factory=list)
+    possible_items: List[str] = Field(default_factory=list)         # for virtuals / double deals
 
-    slots: Dict[str, ComboSlot] = Field(default_factory=dict)
-    discount: float = 0.0
+    slots: Dict[str, ComboSlot] = Field(default_factory=dict)       # for additional combo components (e.g. fries, drinks)
+    discount: float = 0.0                                           # for deals
     is_deal: bool = False
 
 
@@ -43,10 +49,10 @@ class OrderComponent(BaseModel):
 
 class OrderItem(BaseModel):
     name: str
-    kind: Literal["item", "combo", "double_deal"] = "item"
+    kind: ItemType = ItemType.ITEM
     quantity: int = 1
-    properties: Dict[str, str] = Field(default_factory=dict)
-    components: List[OrderComponent] = Field(default_factory=list)
+    properties: Dict[str, str] = Field(default_factory=dict)              # e.g. size: large
+    components: List[OrderComponent] = Field(default_factory=list)        # for combos/deals
     add_ingredients: List[str] = Field(default_factory=list)
     remove_ingredients: List[str] = Field(default_factory=list)
 

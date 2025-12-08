@@ -1,4 +1,4 @@
-from app.schemas import SessionState, OrderItem
+from app.schemas import SessionState, OrderItem, OrderComponent
 from app.services.llm_service import LLMService
 from app.services.cart_service import CartService
 from app.services.menu_service import MenuService
@@ -44,16 +44,34 @@ class ChatService:
                         found_name = llm_result.intent.ordered_items[0].name
                         exact_match = self.menu.get_item(found_name)
 
-                if exact_match and not exact_match.virtual:
-                    item.name = exact_match.name
-                    item.components = [] 
-                    is_valid, error_msg = self.cart.validate_item(item)
-                    if is_valid:
-                        self.cart.add_item(state.order, item)
-                        state.pending_items.pop(0)
-                        response_buffer.append(f"Added {item.name}.")
-                    else:
-                        return f"{error_msg}"
+                if exact_match:
+                    added_to_slot = False
+                    if meta and meta.slots:
+                        for slot_name, slot_def in meta.slots.items():
+                            if exact_match.name in slot_def.options:
+                                item.components.append(OrderComponent(name=exact_match.name, slot=slot_name))
+                                added_to_slot = True
+                                break
+                    
+                    if added_to_slot:
+                        is_valid, error_msg = self.cart.validate_item(item)
+                        if is_valid:
+                            self.cart.add_item(state.order, item)
+                            state.pending_items.pop(0)
+                            response_buffer.append(f"Added {item.name} with {exact_match.name}.")
+                        else:
+                            return f"{error_msg}"
+
+                    elif not exact_match.virtual:
+                        item.name = exact_match.name
+                        item.components = [] 
+                        is_valid, error_msg = self.cart.validate_item(item)
+                        if is_valid:
+                            self.cart.add_item(state.order, item)
+                            state.pending_items.pop(0)
+                            response_buffer.append(f"Added {item.name}.")
+                        else:
+                            return f"{error_msg}"
                 else:
                     pass
 

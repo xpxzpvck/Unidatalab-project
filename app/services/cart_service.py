@@ -77,12 +77,17 @@ class CartService:
                     found = any(c.slot in ["drink", "drinks"] for c in item.components)
 
                 if not found:
-                    examples = (
-                        slot_def.options[:3] if slot_def.options else ["Cola", "Fanta"]
-                    )
+                    if slot_name == "fries":
+                        default_fry = "French Fries"
+                        if default_fry in slot_def.options:
+                            item.components.append(OrderComponent(name=default_fry, slot=slot_name))
+                            continue
+                    
+                    slot_display = "drink" if slot_name in ["drink", "drinks"] else slot_name
+                    
                     return (
                         False,
-                        f"Please choose a drink for {item.name}: {', '.join(examples)}...",
+                        f"Please choose a {slot_display} for {item.name}: {', '.join(slot_def.options)}.",
                     )
 
         return True, ""

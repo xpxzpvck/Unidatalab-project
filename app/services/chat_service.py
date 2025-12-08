@@ -38,8 +38,15 @@ class ChatService:
                 return f"{error_msg}"
             else:
                 exact_match = self.menu.get_item(user_input.title()) 
+                if not exact_match:
+                    llm_result = self.llm.parse_intent(user_input, self.menu.menu)
+                    if llm_result.success and llm_result.intent.ordered_items:
+                        found_name = llm_result.intent.ordered_items[0].name
+                        exact_match = self.menu.get_item(found_name)
+
                 if exact_match and not exact_match.virtual:
                     item.name = exact_match.name
+                    item.components = [] 
                     is_valid, error_msg = self.cart.validate_item(item)
                     if is_valid:
                         self.cart.add_item(state.order, item)

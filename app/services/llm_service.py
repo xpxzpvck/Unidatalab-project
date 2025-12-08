@@ -45,6 +45,7 @@ class LLMService:
             "- Use ONLY item names from the provided menu data.\n"
             "- Map user synonyms to the exact menu item name (e.g. if user says 'Coke' or 'Cola', use 'Coca-Cola').\n"
             "- For generic requests like 'burger' or 'drink', use the generic name (e.g. 'burger') so the system can ask for clarification.\n"
+            "- If the user indicates they want to cancel the current pending item (e.g. 'no', 'cancel', 'changed mind', 'forget it'), set 'cancel_pending' to true.\n"
             "- Default quantity is 1.\n\n"
             f"Current order summary: {prior_summary or 'empty'}\n"
             f"Menu Data:\n{menu_json}"

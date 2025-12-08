@@ -113,6 +113,10 @@ class LLMOrderIntent(BaseModel):
     end_order: bool = Field(
         default=False, description="True if the user explicitly finishes the order."
     )
+    cancel_pending: bool = Field(
+        default=False,
+        description="True if the user wants to cancel the current item selection/clarification or says 'no', 'cancel', 'change mind', etc."
+    )
 
 
 class LLMResult(BaseModel):

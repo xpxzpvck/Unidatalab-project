@@ -53,9 +53,15 @@ class ChatService:
                     llm_result = self.llm.parse_intent(
                         user_input, self.menu.menu, context
                     )
-                    if llm_result.success and llm_result.intent.ordered_items:
-                        found_name = llm_result.intent.ordered_items[0].name
-                        exact_match = self.menu.get_item(found_name)
+                    
+                    if llm_result.success:
+                        if llm_result.intent.cancel_pending:
+                            state.pending_items.pop(0)
+                            response_buffer.append("Cancelled.")
+                            exact_match = None 
+                        elif llm_result.intent.ordered_items:
+                            found_name = llm_result.intent.ordered_items[0].name
+                            exact_match = self.menu.get_item(found_name)
 
                 if exact_match:
                     added_to_slot = False

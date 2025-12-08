@@ -44,7 +44,7 @@ async def chat_endpoint(req: ChatRequest):
 
     response_text = chat_service.process_message(state, req.message)
 
-    summary = [i.describe() for i in state.order.items]
+    summary = [str(i) for i in state.order.items]
     total = cart_service.calculate_total(state.order)
 
     return ChatReply(

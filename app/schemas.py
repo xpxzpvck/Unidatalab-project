@@ -1,3 +1,4 @@
+import json
 from typing import Dict, List, Optional, Literal
 from pydantic import BaseModel, Field
 from enum import Enum
@@ -38,6 +39,21 @@ class Menu(BaseModel):
     items: Dict[str, MenuItem] = Field(default_factory=dict)
     ingredients: Dict[str, Ingredient] = Field(default_factory=dict)
 
+    def __str__(self) -> str:
+        payload = {
+            "items": [
+                {
+                    "name": item.name,
+                    "category": item.category,
+                    "price": item.price,
+                    "properties": item.properties or None,
+                }
+                for item in self.items.values()
+            ],
+            "ingredients": list(self.ingredients.keys()),
+        }
+        return json.dumps(payload, indent=2)
+
 
 class OrderComponent(BaseModel):
     name: str
@@ -56,7 +72,7 @@ class OrderItem(BaseModel):
     add_ingredients: List[str] = Field(default_factory=list)
     remove_ingredients: List[str] = Field(default_factory=list)
 
-    def describe(self) -> str:
+    def __str__(self) -> str:
         parts = [self.name]
         for comp in self.components:
             parts.append(f"[{comp.slot or 'incl'}: {comp.name}]")
@@ -86,3 +102,22 @@ class ChatReply(BaseModel):
     used_llm_fallback: bool
     order_summary: List[str]
     total: float
+
+class LLMOrderIntent(BaseModel):
+    ordered_items: list[OrderItem] = Field(
+        default_factory=list,
+        description="List of items the user wants to order. Use exact menu names.",
+    )
+    end_order: bool = Field(
+        default=False, description="True if the user explicitly finishes the order."
+    )
+
+
+class LLMResult(BaseModel):
+    intent: Optional[LLMOrderIntent]
+    raw: str
+    error: Optional[str] = None
+
+    @property
+    def success(self) -> bool:
+        return self.error is None and self.intent is not None

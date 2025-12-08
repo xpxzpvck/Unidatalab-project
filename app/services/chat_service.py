@@ -39,7 +39,7 @@ class ChatService:
             else:
                 state.pending_item = None
 
-        summary = "; ".join([i.describe() for i in state.order.items])
+        summary = "; ".join([str(i) for i in state.order.items])
         llm_result = self.llm.parse_intent(user_input, self.menu.menu, summary)
 
         if not llm_result.success or not llm_result.intent:
@@ -50,7 +50,7 @@ class ChatService:
 
         if intent.end_order:
             total = self.cart.calculate_total(state.order)
-            order_summary = ", ".join([i.describe() for i in state.order.items])
+            order_summary = ", ".join([str(i) for i in state.order.items])
             return f"Order completed. Your order: {order_summary}. Amount due: ${total:.2f}. Thank you!"
 
         for item in intent.ordered_items:

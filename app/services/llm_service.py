@@ -6,31 +6,10 @@ from dataclasses import dataclass
 from pydantic import BaseModel, Field, ValidationError
 from cerebras.cloud.sdk import Cerebras
 
-from app.schemas import Menu, OrderItem
+from app.schemas import Menu, OrderItem, LLMOrderIntent, LLMResult
 from app.config import settings
 
 logger = logging.getLogger(__name__)
-
-
-class LLMOrderIntent(BaseModel):
-    ordered_items: list[OrderItem] = Field(
-        default_factory=list,
-        description="List of items the user wants to order. Use exact menu names.",
-    )
-    end_order: bool = Field(
-        default=False, description="True if the user explicitly finishes the order."
-    )
-
-
-@dataclass
-class LLMResult:
-    intent: Optional[LLMOrderIntent]
-    raw: str
-    error: Optional[str] = None
-
-    @property
-    def success(self) -> bool:
-        return self.error is None and self.intent is not None
 
 
 class LLMService:
@@ -72,7 +51,7 @@ class LLMService:
                 error="LLM Client not initialized (missing API key?)",
             )
 
-        menu_json = self._menu_to_prompt_format(menu)
+        menu_json = str(menu)
 
         system_content = (
             "You are an ordering intent extractor for a McDonald's text chat. "
@@ -122,7 +101,7 @@ class LLMService:
         if not self.client:
             return "Sorry, the LLM service is currently unavailable."
 
-        menu_dump = self._menu_to_prompt_format(menu)
+        menu_dump = str(menu)
 
         system_prompt = (
             "You are a friendly McDonald's ordering assistant. "

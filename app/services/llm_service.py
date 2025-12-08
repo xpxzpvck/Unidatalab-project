@@ -26,21 +26,6 @@ class LLMService:
                 self.client = None
         self.model_name = model_name
 
-    def _menu_to_prompt_format(self, menu: Menu) -> str:
-        payload = {
-            "items": [
-                {
-                    "name": item.name,
-                    "category": item.category,
-                    "price": item.price,
-                    "properties": item.properties or None,
-                }
-                for item in menu.items.values()
-            ],
-            "ingredients": list(menu.ingredients.keys()),
-        }
-        return json.dumps(payload, indent=2)
-
     def parse_intent(
         self, user_message: str, menu: Menu, prior_summary: str = ""
     ) -> LLMResult:

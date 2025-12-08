@@ -95,6 +95,20 @@ class MenuService:
             deal_item.is_deal = True
             self._upsert_item(deal_item)
 
+        sauce_options = [
+            i.name for i in self.menu.items.values() 
+            if i.category == "sauces"
+        ]
+        
+        if sauce_options:
+            for v_name in ["sauce", "dipping sauce"]:
+                if v_name not in self.menu.items:
+                    self.menu.items[v_name] = MenuItem(
+                        name=v_name,
+                        virtual=True,
+                        possible_items=sauce_options
+                    )
+
     def get_item(self, name: str) -> Optional[MenuItem]:
         return self.menu.items.get(name)
 

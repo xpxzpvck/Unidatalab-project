@@ -27,8 +27,8 @@ class ChatService:
             if meta:
                 for prop_name, valid_values in meta.properties.items():
                     if prop_name not in item.properties:
-                        if user_input.lower() in [v.lower() for v in valid_values]:
-                            item.properties[prop_name] = user_input.lower()
+                        if user_input.lower().strip(".,!?") in [v.lower() for v in valid_values]:
+                            item.properties[prop_name] = user_input.lower().strip(".,!?")
                             resolved = True
                             break
 
@@ -119,7 +119,12 @@ class ChatService:
                     and not llm_result.intent.end_order
                 )
             ):
-                reply = self.llm.generate_reply(user_input, self.menu.menu, context)
+                reply = self.llm.generate_reply(
+                    user_input, 
+                    self.menu.menu, 
+                    context, 
+                    has_upsell=bool(state.upsell_queue)
+                )
                 reply = f"[LLM] {reply}"
 
                 if state.upsell_queue:

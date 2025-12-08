@@ -83,7 +83,7 @@ class LLMService:
             return LLMResult(intent=None, raw=str(exc), error=str(exc))
 
     def generate_reply(
-        self, user_message: str, menu: Menu, order_summary: str = ""
+        self, user_message: str, menu: Menu, order_summary: str = "", has_upsell: bool = False
     ) -> str:
         if not self.client:
             return "Sorry, the LLM service is currently unavailable."
@@ -97,6 +97,12 @@ class LLMService:
             f"Menu context: {menu_dump}\n"
             f"Current order: {order_summary or 'empty'}\n"
         )
+
+        if has_upsell:
+            system_prompt += (
+                "NOTE: Do NOT ask 'anything else?', 'what else?', or 'is that all?' at the end. "
+                "The system will append a specific question immediately after your response."
+            )
 
         try:
             response = self.client.chat.completions.create(

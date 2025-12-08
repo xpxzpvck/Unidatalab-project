@@ -26,15 +26,9 @@ class MenuService:
         return {}
 
     def _load_menu(self):
-        files = [
-            "menu_deals.yaml",
-            "menu_ingredients.yaml",
-            "menu_upsells.yaml",
-            "menu_virtual_items.yaml",
-        ]
         raw_data = {"items": [], "combos": [], "deals": [], "ingredients": []}
 
-        for fname in files:
+        for fname in settings.MENU_FILES:
             fpath = settings.DATA_DIR / fname
             if fpath.exists():
                 with open(fpath, "r", encoding="utf-8") as f:

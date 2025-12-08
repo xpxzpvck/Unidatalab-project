@@ -1,12 +1,19 @@
 from pathlib import Path
+from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parent.parent
 
 class Settings(BaseSettings):
     BASE_DIR: Path = ROOT
-
     DATA_DIR: Path = ROOT / "data"
+    MENU_FILES: List[str] = [
+        "menu_deals.yaml",
+        "menu_ingredients.yaml",
+        "menu_upsells.yaml",
+        "menu_virtual_items.yaml",
+    ]
+
     LLM_MODEL: str = "gpt-oss-120b"
     CEREBRAS_API_KEY: str = ""
 

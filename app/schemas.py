@@ -24,9 +24,11 @@ class MenuItem(BaseModel):
     name: str
     category: Optional[str] = None                                   # e.g. burgers, fries, desserts
     price: Optional[float] = None
+
     properties: Dict[str, List[str]] = Field(default_factory=dict)  # e.g. size: [small, medium, large]
     default_ingredients: List[str] = Field(default_factory=list)    # ingredients included by default
     possible_ingredients: List[str] = Field(default_factory=list)   # ingredients that can be added/removed
+
     virtual: bool = False
     possible_items: List[str] = Field(default_factory=list)         # for virtuals / double deals
 

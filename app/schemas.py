@@ -76,8 +76,31 @@ class OrderItem(BaseModel):
 
     def __str__(self) -> str:
         parts = [self.name]
+        
+        if self.properties:
+            props = [v for v in self.properties.values()]
+            if props:
+                parts.append(f"({' '.join(props)})")
+
+        for ing in self.add_ingredients:
+            parts.append(f"[+ {ing}]")
+        for ing in self.remove_ingredients:
+            parts.append(f"[- {ing}]")
+
         for comp in self.components:
-            parts.append(f"[{comp.slot or 'incl'}: {comp.name}]")
+            comp_desc = f"{comp.slot or 'incl'}: {comp.name}"
+            
+            extras = []
+            for ing in comp.add_ingredients:
+                extras.append(f"+ {ing}")
+            for ing in comp.remove_ingredients:
+                extras.append(f"- {ing}")
+            
+            if extras:
+                comp_desc += f" ({', '.join(extras)})"
+            
+            parts.append(f"[{comp_desc}]")
+
         return f"{self.quantity}x {' '.join(parts)}"
 
 

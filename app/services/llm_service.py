@@ -93,7 +93,7 @@ class LLMService:
         system_prompt = (
             "You are a friendly McDonald's ordering assistant. "
             "Keep replies concise and natural. "
-            "Do NOT claim to add/remove items yourself in this text reply; just acknowledge or ask clarifying questions.\n"
+            "Do NOT claim to add/remove items yourself in this text reply; ask clarifying questions.\n"
             f"Menu context: {menu_dump}\n"
             f"Current order: {order_summary or 'empty'}\n"
         )

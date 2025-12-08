@@ -43,6 +43,7 @@ class LLMService:
             "Analyze the user's message and extract the ordering intent according to the provided schema.\n"
             "RULES:\n"
             "- Use ONLY item names from the provided menu data.\n"
+            "- Map user synonyms to the exact menu item name (e.g. if user says 'Coke' or 'Cola', use 'Coca-Cola').\n"
             "- For generic requests like 'burger' or 'drink', use the generic name (e.g. 'burger') so the system can ask for clarification.\n"
             "- Default quantity is 1.\n\n"
             f"Current order summary: {prior_summary or 'empty'}\n"

@@ -195,7 +195,17 @@ class ChatService:
         if not deals:
             return
 
-        pending = state.pending_items
+        flat_pending = []
+        for item in state.pending_items:
+            if item.quantity > 1:
+                for _ in range(item.quantity):
+                    new_item = item.model_copy(deep=True)
+                    new_item.quantity = 1
+                    flat_pending.append(new_item)
+            else:
+                flat_pending.append(item)
+
+        pending = flat_pending
         new_pending = []
         used_indices = set()
 

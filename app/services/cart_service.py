@@ -28,6 +28,8 @@ class CartService:
                         subtotal += comp_price
 
                 discount = meta.discount or 0.0
+                if discount == 0.0 and "Double Deal" in meta.name:
+                    discount = 0.20
                 item_total = subtotal * (1.0 - discount)
 
             else:

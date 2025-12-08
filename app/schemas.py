@@ -89,6 +89,7 @@ class SessionState(BaseModel):
     order: Order = Field(default_factory=Order)
     pending_items: List[OrderItem] = Field(default_factory=list)     
     pending_clarification: Optional[str] = None
+    upsell_queue: List[str] = Field(default_factory=list)
     last_system_message: str = ""
 
 

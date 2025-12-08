@@ -108,6 +108,14 @@ class ChatService:
 
             if not llm_result.success or not llm_result.intent:
                 reply = self.llm.generate_reply(user_input, self.menu.menu, context)
+
+                if state.upsell_queue:
+                    next_upsell = state.upsell_queue.pop(0)
+
+                    final_msg = f"{reply} {next_upsell}"
+                    state.last_system_message = final_msg
+                    return final_msg
+
                 state.last_system_message = reply
                 return reply
 
@@ -139,33 +147,36 @@ class ChatService:
                 return final_msg
 
         if items_added_this_turn:
-            upsells = self._get_upsells(state, items_added_this_turn)
-            base_msg = " ".join(response_buffer)
+            new_upsells = self._get_upsells(state, items_added_this_turn)
 
-            if upsells:
-                final_msg = f"{base_msg} {upsells}"
+            for u in new_upsells:
+                if u not in state.upsell_queue:
+                    state.upsell_queue.append(u)
+
+        base_msg = " ".join(response_buffer)
+
+        if state.upsell_queue:
+            next_upsell = state.upsell_queue.pop(0)
+            if base_msg:
+                final_msg = f"{base_msg} {next_upsell}"
             else:
-                total = self.cart.calculate_total(state.order)
+
+                final_msg = next_upsell
+        else:
+
+            total = self.cart.calculate_total(state.order)
+            if base_msg:
                 final_msg = f"{base_msg} (Total: ${total:.2f}). Anything else?"
+            else:
 
-            state.last_system_message = final_msg
-            return final_msg
+                final_msg = f"Current order total: ${total:.2f}. Anything else?"
 
-        if not response_buffer:
-
-            context = "; ".join([str(i) for i in state.order.items])
-            reply = self.llm.generate_reply(user_input, self.menu.menu, context)
-            state.last_system_message = reply
-            return reply
-
-        total = self.cart.calculate_total(state.order)
-        final_msg = (
-            " ".join(response_buffer) + f" (Total: ${total:.2f}). Anything else?"
-        )
         state.last_system_message = final_msg
         return final_msg
 
-    def _get_upsells(self, state: SessionState, new_items: list[OrderItem]) -> str:
+    def _get_upsells(
+        self, state: SessionState, new_items: list[OrderItem]
+    ) -> list[str]:
         messages = []
         has_dessert = any(
             self.menu.get_item(i.name)
@@ -195,4 +206,4 @@ class ChatService:
                 messages.append("Would you like a dessert with that?")
                 offered_dessert = True
 
-        return " ".join(messages)
+        return messages

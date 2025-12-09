@@ -12,17 +12,15 @@ ENV ENVIRONMENT=${ENVIRONMENT} \
   POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
-  POETRY_HOME='/opt/poetry' \
-  POETRY_VERSION=1.7.1
-
-ENV PATH="$POETRY_HOME/bin:$PATH"
+  POETRY_VERSION=1.8.4
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN pip install "poetry==$POETRY_VERSION"
+
 
 WORKDIR /code
 COPY poetry.lock pyproject.toml /code/
@@ -31,4 +29,6 @@ RUN poetry install $(test "$ENVIRONMENT" = production && echo "--only=main") --n
 
 COPY . /code
 
-CMD ["python", "app/main.py"]
+EXPOSE 8000
+
+CMD ["python", "-m", "app.main", "serve", "--host", "0.0.0.0", "--port", "8000"]

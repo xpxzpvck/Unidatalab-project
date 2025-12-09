@@ -1,1 +1,10 @@
-task_md.md
+__pycache__/
+.pytest_cache/
+.venv/
+.DS_Store
+.env
+.idea/
+.vscode/
+*.pyc
+dist/
+build/

@@ -171,6 +171,27 @@ class ChatService:
                 state.last_system_message = final_msg
                 return final_msg
 
+        for added_item in items_added_this_turn:
+            if added_item.name.endswith(" Meal"):
+                base_name = added_item.name[:-5]
+                
+                qty_in_cart = sum(i.quantity for i in state.order.items if i.name == base_name)
+                qty_added_now = sum(i.quantity for i in items_added_this_turn if i.name == base_name)
+                
+                surplus = qty_in_cart - qty_added_now
+                needed = added_item.quantity
+                
+                while needed > 0 and surplus > 0:
+                    for existing_item in state.order.items:
+                        if existing_item.name == base_name:
+                            if existing_item.quantity > 1:
+                                existing_item.quantity -= 1
+                            else:
+                                state.order.items.remove(existing_item)
+                            surplus -= 1
+                            needed -= 1
+                            break
+
         if items_added_this_turn:
             new_upsells = self._get_upsells(state, items_added_this_turn)
 

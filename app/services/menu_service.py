@@ -109,6 +109,18 @@ class MenuService:
                         possible_items=sauce_options
                     )
 
+        double_deals = [
+            i.name for i in self.menu.items.values()
+            if "Double Deal" in i.name and not i.virtual
+        ]
+        
+        if double_deals and "Double Deal" not in self.menu.items:
+            self.menu.items["Double Deal"] = MenuItem(
+                name="Double Deal",
+                virtual=True,
+                possible_items=double_deals
+            )
+
     def get_item(self, name: str) -> Optional[MenuItem]:
         return self.menu.items.get(name)
 

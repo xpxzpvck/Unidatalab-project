@@ -65,6 +65,12 @@ class CartService:
                 f"What size {item.name}? ({', '.join(meta.properties['size'])})",
             )
 
+        if meta.is_deal and meta.possible_items:
+            if len(item.components) < 2:
+                needed = 2 - len(item.components)
+                options = ", ".join(meta.possible_items)
+                return False, f"Please choose {needed} more item(s) for your {item.name}. Options: {options}."
+
         if meta.slots:
             for slot_name, slot_def in meta.slots.items():
                 if slot_def.optional:

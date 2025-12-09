@@ -72,23 +72,29 @@ class ChatService:
                                 )
                                 added_to_slot = True
                                 break
+                    
+                    added_to_deal = False
+                    if not added_to_slot and meta and meta.is_deal and meta.possible_items:
+                        if exact_match.name in meta.possible_items:
+                            item.components.append(OrderComponent(name=exact_match.name))
+                            added_to_deal = True
 
-                    if added_to_slot:
+                    if added_to_slot or added_to_deal:
                         is_valid, error_msg = self.cart.validate_item(item)
                         if is_valid:
                             self.cart.add_item(state.order, item)
                             items_added_this_turn.append(item)
                             state.pending_items.pop(0)
-                            response_buffer.append(
-                                f"Added {item.name} with {exact_match.name}."
-                            )
+                            if added_to_slot:
+                                response_buffer.append(f"Added {item.name} with {exact_match.name}.")
+                            else:
+                                response_buffer.append(f"Added {item.name}.")
                         else:
                             state.last_system_message = error_msg
                             return f"{error_msg}"
 
                     elif not exact_match.virtual:
                         item.name = exact_match.name
-                        item.components = []
                         is_valid, error_msg = self.cart.validate_item(item)
                         if is_valid:
                             self.cart.add_item(state.order, item)

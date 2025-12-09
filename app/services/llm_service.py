@@ -38,15 +38,9 @@ class LLMService:
 
         menu_json = str(menu)
 
-        system_content = (
-            "You are an ordering intent extractor for a McDonald's text chat. "
-            "Analyze the user's message and extract the ordering intent according to the provided schema.\n"
-            "RULES:\n"
-            "- Use ONLY item names from the provided menu data.\n"
-            "- Map user synonyms to the exact menu item name (e.g. if user says 'Coke' or 'Cola', use 'Coca-Cola').\n"
-            "- For generic requests like 'burger' or 'drink', use the generic name (e.g. 'burger') so the system can ask for clarification.\n"
-            "- If the user indicates they want to cancel the current pending item (e.g. 'no', 'cancel', 'changed mind', 'forget it'), set 'cancel_pending' to true.\n"
-            "- Default quantity is 1.\n\n"
+        system_content = settings.INTENT_PROMPT
+
+        system_content = system_content + (
             f"Current order summary: {prior_summary or 'empty'}\n"
             f"Menu Data:\n{menu_json}"
         )
@@ -90,10 +84,9 @@ class LLMService:
 
         menu_dump = str(menu)
 
-        system_prompt = (
-            "You are a friendly McDonald's ordering assistant. "
-            "Keep replies concise and natural. "
-            "Do NOT claim to add/remove items yourself in this text reply; ask clarifying questions.\n"
+        system_prompt = settings.REPLY_PROMPT
+
+        system_prompt = system_prompt + (
             f"Menu context: {menu_dump}\n"
             f"Current order: {order_summary or 'empty'}\n"
         )

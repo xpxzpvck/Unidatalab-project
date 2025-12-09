@@ -60,7 +60,6 @@ cli = typer.Typer(help="McDonald's text ordering simulator (client/server).")
 
 def _run_client(server_url: str) -> None:
     """Client part"""
-    print(f"Connecting to {server_url}...")
     try:
         with httpx.Client(timeout=30) as client:
 

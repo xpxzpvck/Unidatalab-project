@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     LLM_MODEL: str = "gpt-oss-120b"
     CEREBRAS_API_KEY: str = ""
 
+    MEDIUM_SIZE_DISCOUNT: float = 0.2
+    SMALL_SIZE_DISCOUNT: float = 0.4
+    DOUBLE_DEAL_DISCOUNT: float = 0.2
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_ignore_empty=True,

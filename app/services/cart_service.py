@@ -1,6 +1,8 @@
 from typing import Tuple
 from app.schemas import Order, OrderItem, OrderComponent
 
+from app.config import settings
+
 
 class CartService:
     def __init__(self, menu_service):
@@ -29,11 +31,18 @@ class CartService:
 
                 discount = meta.discount or 0.0
                 if discount == 0.0 and "Double Deal" in meta.name:
-                    discount = 0.20
+                    discount = settings.DOUBLE_DEAL_DISCOUNT
                 item_total = subtotal * (1.0 - discount)
 
             else:
                 item_total = meta.price or 0.0
+
+                if "size" in item.properties:
+                    size_val = item.properties["size"].lower()
+                    if size_val == "medium":
+                        item_total = item_total * (1.0 - settings.MEDIUM_SIZE_DISCOUNT)
+                    elif size_val == "small":
+                        item_total = item_total * (1.0 - settings.SMALL_SIZE_DISCOUNT)
 
                 for ing_name in item.add_ingredients:
                     ing = self.menu_service.get_ingredient(ing_name)

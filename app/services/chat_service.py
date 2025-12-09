@@ -141,9 +141,13 @@ class ChatService:
 
             intent = llm_result.intent
             if intent.end_order:
-                total = self.cart.calculate_total(state.order)
-                order_summary = ", ".join([str(i) for i in state.order.items])
-                msg = f"Order completed. Your order: {order_summary}. Amount due: ${total:.2f}. Thank you!"
+                if not state.order.items:
+                    msg = "No order placed. Have a nice day!"
+                else:
+                    total = self.cart.calculate_total(state.order)
+                    order_summary = ", ".join([str(i) for i in state.order.items])
+                    msg = f"Order completed. Your order: {order_summary}. Amount due: ${total:.2f}. Thank you!"
+                
                 state.last_system_message = msg
                 return msg
 

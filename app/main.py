@@ -49,7 +49,7 @@ async def chat_endpoint(req: ChatRequest):
 
     return ChatReply(
         message=response_text,
-        order_complete="Order completed" in response_text,
+        order_complete="Order completed" in response_text or "No order placed" in response_text,
         used_llm_fallback=False,
         order_summary=summary,
         total=total,

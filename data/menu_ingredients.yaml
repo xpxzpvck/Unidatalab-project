@@ -1,0 +1,472 @@
+ingredients:
+  # Proteins
+  - name: "Beef Patty"
+    price: 1.50
+  - name: "Double Beef Patty"
+    price: 2.75
+  - name: "Chicken Patty"
+    price: 1.25
+  - name: "Fish Patty"
+    price: 1.40
+  
+  # Cheese & Dairy
+  - name: "Cheese Slice"
+    price: 0.50
+  - name: "Double Cheese"
+    price: 0.85
+  - name: "Vanilla Ice Cream"
+    price: 0.60
+  
+  # Vegetables & Toppings
+  - name: "Lettuce"
+    price: 0.25
+  - name: "Onion"
+    price: 0.20
+  - name: "Pickles"
+    price: 0.20
+  - name: "Tomato"
+    price: 0.30
+  - name: "Bacon"
+    price: 0.75
+  
+  # Sauces & Condiments
+  - name: "Big Mac Sauce"
+    price: 0.15
+  - name: "Ketchup"
+    price: 0.10
+  - name: "Mustard"
+    price: 0.10
+  - name: "Mayo"
+    price: 0.15
+  - name: "Tartar Sauce"
+    price: 0.20
+  
+  # Bread & Buns
+  - name: "Sesame Seed Bun"
+    price: 0.40
+  - name: "Regular Bun"
+    price: 0.35
+  - name: "Steamed Bun"
+    price: 0.40
+  
+  # Extras
+  - name: "Ice"
+    price: 0.00
+
+combos:
+  - name: "Big Mac Meal"
+    category: "burgers"
+    price: 7.99
+    slots:
+      fries:
+        - "French Fries"
+        - "Potato Dips"
+      drinks:
+        - "Coca-Cola"
+        - "Fanta"
+        - "Sprite"
+        - "Coffee"
+        - "Tea"
+        - "Apple Juice"
+
+  - name: "Cheeseburger Meal"
+    category: "burgers"
+    price: 5.49
+    slots:
+      fries:
+        - "French Fries"
+        - "Potato Dips"
+      drinks:
+        - "Coca-Cola"
+        - "Fanta"
+        - "Sprite"
+        - "Coffee"
+        - "Tea"
+        - "Apple Juice"
+
+  - name: "Double Cheeseburger Meal"
+    category: "burgers"
+    price: 8.49
+    slots:
+      fries:
+        - "French Fries"
+        - "Potato Dips"
+      drinks:
+        - "Coca-Cola"
+        - "Fanta"
+        - "Sprite"
+        - "Coffee"
+        - "Tea"
+        - "Apple Juice"
+
+  - name: "Filet-O-Fish Meal"
+    category: "burgers"
+    price: 7.19
+    slots:
+      fries:
+        - "French Fries"
+        - "Potato Dips"
+      drinks:
+        - "Coca-Cola"
+        - "Fanta"
+        - "Sprite"
+        - "Coffee"
+        - "Tea"
+        - "Apple Juice"
+
+  - name: "McChicken Meal"
+    category: "burgers"
+    price: 6.79
+    slots:
+      fries:
+        - "French Fries"
+        - "Potato Dips"
+      drinks:
+        - "Coca-Cola"
+        - "Fanta"
+        - "Sprite"
+        - "Coffee"
+        - "Tea"
+        - "Apple Juice"
+
+items:
+  # Burgers
+  - name: "Big Mac"
+    category: "burgers"
+    price: 5.99
+    default_ingredients:
+      - "Double Beef Patty"
+      - "Cheese Slice"
+      - "Lettuce"
+      - "Onion"
+      - "Pickles"
+      - "Big Mac Sauce"
+      - "Sesame Seed Bun"
+    possible_ingredients:
+      - "Double Beef Patty"
+      - "Cheese Slice"
+      - "Double Cheese"
+      - "Lettuce"
+      - "Onion"
+      - "Pickles"
+      - "Tomato"
+      - "Bacon"
+      - "Big Mac Sauce"
+      - "Ketchup"
+      - "Mustard"
+      - "Mayo"
+      - "Sesame Seed Bun"
+
+  - name: "Cheeseburger"
+    category: "burgers"
+    price: 2.49
+    default_ingredients:
+      - "Beef Patty"
+      - "Cheese Slice"
+      - "Onion"
+      - "Pickles"
+      - "Ketchup"
+      - "Mustard"
+      - "Regular Bun"
+    possible_ingredients:
+      - "Beef Patty"
+      - "Double Beef Patty"
+      - "Cheese Slice"
+      - "Double Cheese"
+      - "Lettuce"
+      - "Onion"
+      - "Pickles"
+      - "Tomato"
+      - "Bacon"
+      - "Ketchup"
+      - "Mustard"
+      - "Mayo"
+      - "Regular Bun"
+
+  - name: "Hamburger"
+    category: "burgers"
+    price: 2.09
+    default_ingredients:
+      - "Beef Patty"
+      - "Onion"
+      - "Pickles"
+      - "Ketchup"
+      - "Mustard"
+      - "Regular Bun"
+    possible_ingredients:
+      - "Beef Patty"
+      - "Double Beef Patty"
+      - "Cheese Slice"
+      - "Double Cheese"
+      - "Lettuce"
+      - "Onion"
+      - "Pickles"
+      - "Tomato"
+      - "Bacon"
+      - "Ketchup"
+      - "Mustard"
+      - "Mayo"
+      - "Regular Bun"
+
+  - name: "Filet-O-Fish"
+    category: "burgers"
+    price: 4.19
+    default_ingredients:
+      - "Fish Patty"
+      - "Cheese Slice"
+      - "Tartar Sauce"
+      - "Steamed Bun"
+    possible_ingredients:
+      - "Fish Patty"
+      - "Cheese Slice"
+      - "Double Cheese"
+      - "Lettuce"
+      - "Onion"
+      - "Pickles"
+      - "Tartar Sauce"
+      - "Mayo"
+      - "Steamed Bun"
+
+  - name: "McChicken"
+    category: "burgers"
+    price: 3.79
+    default_ingredients:
+      - "Chicken Patty"
+      - "Lettuce"
+      - "Mayo"
+      - "Regular Bun"
+    possible_ingredients:
+      - "Chicken Patty"
+      - "Cheese Slice"
+      - "Double Cheese"
+      - "Lettuce"
+      - "Onion"
+      - "Pickles"
+      - "Tomato"
+      - "Bacon"
+      - "Mayo"
+      - "Ketchup"
+      - "Mustard"
+      - "Regular Bun"
+
+  - name: "Double Cheeseburger"
+    category: "burgers"
+    price: 3.79
+    default_ingredients:
+      - "Double Beef Patty"
+      - "Double Cheese"
+      - "Onion"
+      - "Pickles"
+      - "Ketchup"
+      - "Mustard"
+      - "Regular Bun"
+    possible_ingredients:
+      - "Double Beef Patty"
+      - "Double Cheese"
+      - "Lettuce"
+      - "Onion"
+      - "Pickles"
+      - "Tomato"
+      - "Bacon"
+      - "Ketchup"
+      - "Mustard"
+      - "Mayo"
+      - "Regular Bun"
+
+  - name: "Royal Cheeseburger"
+    category: "burgers"
+    price: 6.49
+    default_ingredients:
+      - "Beef Patty"
+      - "Cheese Slice"
+      - "Lettuce"
+      - "Onion"
+      - "Pickles"
+      - "Tomato"
+      - "Ketchup"
+      - "Mayo"
+      - "Sesame Seed Bun"
+    possible_ingredients:
+      - "Beef Patty"
+      - "Double Beef Patty"
+      - "Cheese Slice"
+      - "Double Cheese"
+      - "Lettuce"
+      - "Onion"
+      - "Pickles"
+      - "Tomato"
+      - "Bacon"
+      - "Ketchup"
+      - "Mustard"
+      - "Mayo"
+      - "Sesame Seed Bun"
+
+  - name: "Big Tasty"
+    category: "burgers"
+    price: 6.99
+    default_ingredients:
+      - "Beef Patty"
+      - "Cheese Slice"
+      - "Lettuce"
+      - "Onion"
+      - "Tomato"
+      - "Mayo"
+      - "Sesame Seed Bun"
+    possible_ingredients:
+      - "Beef Patty"
+      - "Double Beef Patty"
+      - "Cheese Slice"
+      - "Double Cheese"
+      - "Lettuce"
+      - "Onion"
+      - "Pickles"
+      - "Tomato"
+      - "Bacon"
+      - "Mayo"
+      - "Ketchup"
+      - "Mustard"
+      - "Sesame Seed Bun"
+
+  # Fries
+  - name: "French Fries"
+    category: "fries"
+    price: 1.99
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+    default_ingredients: []
+    possible_ingredients:
+      - "Ketchup"
+      - "Mayo"
+
+  - name: "Potato Dips"
+    category: "fries"
+    price: 2.19
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+    default_ingredients: []
+    possible_ingredients:
+      - "Ketchup"
+      - "Mayo"
+
+  # Drinks
+  - name: "Coca-Cola"
+    category: "drinks"
+    price: 1.29
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+    default_ingredients:
+      - "Ice"
+    possible_ingredients:
+      - "Ice"
+
+  - name: "Fanta"
+    category: "drinks"
+    price: 1.29
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+    default_ingredients:
+      - "Ice"
+    possible_ingredients:
+      - "Ice"
+
+  - name: "Sprite"
+    category: "drinks"
+    price: 1.29
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+    default_ingredients:
+      - "Ice"
+    possible_ingredients:
+      - "Ice"
+
+  - name: "Coffee"
+    category: "drinks"
+    price: 1.09
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+    default_ingredients: []
+    possible_ingredients: []
+
+  - name: "Tea"
+    category: "drinks"
+    price: 1.09
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+          - "large"
+    default_ingredients: []
+    possible_ingredients: []
+
+  - name: "Apple Juice"
+    category: "drinks"
+    price: 1.49
+    properties:
+      - name: "size"
+        values:
+          - "small"
+          - "medium"
+    default_ingredients: []
+    possible_ingredients: []
+
+  - name: "Milk"
+    category: "drinks"
+    price: 1.29
+    default_ingredients: []
+    possible_ingredients: []
+
+  # Desserts
+  - name: "McFlurry with M&M's"
+    category: "desserts"
+    price: 2.09
+    default_ingredients: []
+    possible_ingredients: []
+
+  - name: "McFlurry with Oreo"
+    category: "desserts"
+    price: 2.09
+    default_ingredients: []
+    possible_ingredients: []
+
+  - name: "Vanilla Cone"
+    category: "desserts"
+    price: 0.79
+    default_ingredients: []
+    possible_ingredients: []
+
+  - name: "Chocolate Chip Cookie"
+    category: "desserts"
+    price: 1.09
+    default_ingredients: []
+    possible_ingredients: []
+
+  - name: "Apple Pie"
+    category: "desserts"
+    price: 1.29
+    default_ingredients: []
+    possible_ingredients: []

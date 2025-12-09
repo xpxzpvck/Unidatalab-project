@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "ordering-simulator"
+version = "0.1.0"
+description = "Text-based ordering simulator for McDonald's."
+authors = ["Zakharii Tepliakov <zakhariitepliakov@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.14"
+pyyaml = "^6.0.3"
+pydantic = "^2.12.5"
+python-dotenv = "^1.2.1"
+cerebras-cloud-sdk = "^1.0.0"
+fastapi = "^0.115.5"
+uvicorn = "^0.32.0"
+httpx = "^0.28.1"
+typer = ">=0.16.0"
+pydantic-settings = "^2.12.0"
+
+[build-system]
+requires = ["poetry-core>=1.6"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+mcd-cli = "app.main:main"

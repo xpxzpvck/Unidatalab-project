@@ -1,0 +1,34 @@
+FROM python:3.13-slim-bookworm
+
+ARG ENVIRONMENT=development
+
+ENV ENVIRONMENT=${ENVIRONMENT} \
+  PYTHONFAULTHANDLER=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=off \
+  PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100 \
+  POETRY_NO_INTERACTION=1 \
+  POETRY_VIRTUALENVS_CREATE=false \
+  POETRY_CACHE_DIR='/var/cache/pypoetry' \
+  POETRY_VERSION=1.8.4
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install "poetry==$POETRY_VERSION"
+
+
+WORKDIR /code
+COPY poetry.lock pyproject.toml /code/
+
+RUN poetry install $(test "$ENVIRONMENT" = production && echo "--only=main") --no-interaction --no-ansi
+
+COPY . /code
+
+EXPOSE 8000
+
+CMD ["python", "-m", "app.main", "serve", "--host", "0.0.0.0", "--port", "8000"]

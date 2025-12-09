@@ -1,4 +1,3 @@
-import asyncio
 import os
 import uuid
 from typing import Dict
@@ -26,7 +25,7 @@ sessions: Dict[str, SessionState] = {}
 
 
 @app.post("/sessions")
-async def create_session():
+def create_session():
     sid = uuid.uuid4().hex
     sessions[sid] = SessionState()
     return {
@@ -36,7 +35,7 @@ async def create_session():
 
 
 @app.post("/chat", response_model=ChatReply)
-async def chat_endpoint(req: ChatRequest):
+def chat_endpoint(req: ChatRequest):
     if req.session_id not in sessions:
         raise HTTPException(404, "Session not found")
 
@@ -59,13 +58,13 @@ async def chat_endpoint(req: ChatRequest):
 cli = typer.Typer(help="McDonald's text ordering simulator (client/server).")
 
 
-async def _run_client(server_url: str) -> None:
+def _run_client(server_url: str) -> None:
     """Client part"""
     print(f"Connecting to {server_url}...")
     try:
-        async with httpx.AsyncClient(timeout=30) as client:
+        with httpx.Client(timeout=30) as client:
 
-            session_resp = await client.post(f"{server_url}/sessions")
+            session_resp = client.post(f"{server_url}/sessions")
             session_resp.raise_for_status()
             data = session_resp.json()
             session_id = data["session_id"]
@@ -78,7 +77,7 @@ async def _run_client(server_url: str) -> None:
                 if user_input.lower() in ["quit", "exit"]:
                     break
 
-                resp = await client.post(
+                resp = client.post(
                     f"{server_url}/chat",
                     json={"session_id": session_id, "message": user_input},
                 )
@@ -103,7 +102,7 @@ def chat(
     )
 ) -> None:
     """Start the chat client."""
-    asyncio.run(_run_client(server))
+    _run_client(server)
 
 
 @cli.command()
@@ -113,7 +112,6 @@ def serve(
     reload: bool = typer.Option(False, "--reload", help="Enable auto-reload"),
 ) -> None:
     """Run the FastAPI server."""
-
     uvicorn.run("app.main:app", host=host, port=port, reload=reload)
 
 
